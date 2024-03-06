@@ -1,0 +1,34 @@
+@startuml
+
+participant 事件发布 as publisher
+participant 诊断流程触发器 as trigger
+participant 诊断处理器 as processor
+participant 诊断实体 as diagnoseEntity
+participant 诊断规则组 as groups
+participant 诊断规则 as rules
+
+autonumber
+publisher -> trigger: 监听报警事件(event)
+trigger -> processor: 组装诊断请求体
+
+activate trigger
+processor -> processor: getGroupsByType(type)
+processor --> trigger: 返回诊断请求体request
+deactivate trigger
+
+trigger -> processor: 进行诊断(request)
+
+processor -> groups: 获取规则
+activate groups
+groups -> processor: 返回规则
+deactivate groups
+
+processor -> rules: 遍历规则计算
+activate rules
+rules -> processor: 返回计算结果
+deactivate rules
+
+processor -> diagnoseEntity: 组装诊断实体
+diagnoseEntity -> diagnoseEntity: 诊断实体持久化
+processor -> publisher: 发布诊断结果事件
+@enduml

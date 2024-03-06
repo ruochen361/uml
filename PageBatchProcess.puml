@@ -1,0 +1,46 @@
+@startuml
+participant 业务端 as business
+participant 过滤器 as filter
+participant 分页处理器 as handle
+participant actoken as actoken
+participant 中台 as gdc
+
+
+autonumber
+business -> filter: 业务请求
+filter->filter: 判断请求业务类型
+note left: 查询接口必须传分页参数
+filter -> actoken: 其他请求
+actoken -> gdc: 其他请求
+actoken <- gdc: 返回请求结果
+business <- actoken: 返回请求结果
+
+
+alt 分页处理
+    filter -> handle: 分页请求
+
+    activate handle
+    handle -> handle: 判断是否超过分页限制
+    handle -> gdc: 分页查询获取总条数
+
+else 超过分页限制
+    handle -> handle: 计算批次及线程数
+    activate handle
+    handle -> actoken: 分批次多线程分页请求
+    actoken -> gdc: 分页请求
+    handle <- gdc: 返回分页结果
+    handle -> handle: 合并批次内多线程请求结果
+    handle -> handle: 合并批次结果
+    business <- handle: 返回查询结果
+    deactivate
+
+else 未超过分页限制
+
+    handle -> actoken: 分页查询
+    actoken -> gdc: 分页请求
+    handle <- gdc: 返回分页结果
+    business <- handle: 返回查询结果
+    deactivate
+end
+
+@enduml

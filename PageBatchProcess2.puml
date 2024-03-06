@@ -1,0 +1,40 @@
+@startuml
+participant 业务端 as business
+participant actoken as actoken
+participant 过滤器 as filter
+participant 分页处理器 as handle
+participant 中台 as gdc
+
+
+autonumber
+business -> actoken: 业务请求
+filter->filter: 判断请求业务类型
+note left: 查询接口必须传分页参数（page,size,enableCount）
+filter -> gdc: 其他请求
+filter <- gdc: 返回请求结果
+filter -> actoken: 返回请求结果
+business <- actoken: 返回请求结果
+filter -> handle: 分页请求
+
+
+alt size>500
+    handle -> handle: 计算起始页
+    handle -> gdc: 查询起始页(enableCount=true)
+    handle -> handle: 分页条件重算（结束页，页数）
+    alt 查询分页
+        loop 重算的页数
+            par 并发请求，一次性全部请求
+                handle -> gdc: 并发分页查询获取数据(enableCount=false)
+            end
+        end
+        gdc --> handle: 返回数据
+        handle -> handle: 合并请求结果，抽取返回数据
+    end
+    handle --> actoken: 返回数据
+else size<=500
+    handle -> gdc: 查询起始页
+    gdc --> handle: 返回数据
+    handle --> actoken: 返回数据
+end
+actoken -> business: 返回分页结果
+@enduml

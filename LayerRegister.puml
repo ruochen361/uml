@@ -1,0 +1,46 @@
+@startuml
+'https://plantuml.com/object-diagram
+
+class RegisterManage{
+    - List<RegisterProcessor> processor
+    + RegisterResult registerHandle(RegisterReq req)
+}
+interface RegisterProcessor{
+    + RegisterResult register(RegisterReq req)
+}
+abstract AbstractRegisterProcessor{
+    + Platform
+    - ObjectDefinition createObject()
+    - Boolean dataSync()
+}
+class SuperMapProcessor{
+    + Platform support()
+    + RegisterResult register(RegisterReq req)
+    - ObjectDefinition createObject()
+    - Boolean dataSync()
+}
+class ArcgisProcessor{
+     + Platform support()
+     + RegisterResult register(RegisterReq req)
+     - ObjectDefinition createObject()
+     - Boolean dataSync()
+}
+class GeoserverProcessor{
+     + Platform support()
+     + RegisterResult register(RegisterReq req)
+     - ObjectDefinition createObject()
+     - Boolean dataSync()
+}
+
+enum Platform{
+    SUPER_MAP
+    ARCGIS
+    GEOSERVER
+}
+
+RegisterManage o-- RegisterProcessor
+RegisterProcessor <|-- AbstractRegisterProcessor
+AbstractRegisterProcessor <|-- SuperMapProcessor
+AbstractRegisterProcessor <|-- ArcgisProcessor
+AbstractRegisterProcessor <|-- GeoserverProcessor
+@enduml

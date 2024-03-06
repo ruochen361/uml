@@ -1,0 +1,80 @@
+@startuml
+class DiagnoseEntity{
+
+    - BasicInfo getBasicInfo();
+    - TriggerInfo getTriggerInfo();
+    - DiagnoseConclusion getDiagnoseConclusion();
+    - DiagnoseHandleInfo getDiagnoseHandleInfo();
+
+    - void save();
+    - Boolean supportType();
+}
+
+class BasicInfo{
+    - String diagnoseId;
+    - Long diagnoseTime;
+}
+
+class TriggerInfo{
+    - String alarmId;
+}
+
+class DiagnoseConclusion{
+    - List<String> reasons; //原因分析
+    - List<String> solutions; //解决方案
+}
+
+class DiagnoseHandleInfo{
+    - String workOrderId; //工单编号
+}
+DiagnoseEntity "1" *-- "1" BasicInfo
+DiagnoseEntity "1" *-- "1" TriggerInfo
+DiagnoseEntity "1" *-- "1" DiagnoseConclusion
+DiagnoseEntity "1" *-- "1" DiagnoseHandleInfo
+@enduml
+```
+
+@startuml
+class DiagnoseRuleParam{
+    - String id;
+    - String name;
+    - double value;//参数值
+    - String unit;//单位
+    - String operator;//逻辑比较码
+}
+
+abstract class DiagnoseRule{
+    - String id;
+    - String groupId;
+    - String ruleName;
+    - List<DiagnoseRuleParam> paramList;
+
+    - void enable();//生效
+    - void disEnable();//失效
+    - Boolean isEnable();
+
+    - {abstract} RuleDiagnoseResult diagnose(DiagnoseRequest request);//诊断计算
+}
+DiagnoseRule "1" *-- "Many" DiagnoseRuleParam
+@enduml
+```
+
+
+@startuml
+interface IDiagnoseRuleGroup {
+
+    - {abstract} List<AbstractDiagnoseRule> getRules(IDiagnoseRuleGroupRepository diagnoseRuleGroupRepository);
+}
+
+class DefaultDiagnoseRuleGroup{
+    - String groupId;
+    - String alarmType;
+    - String reason; //原因分析
+    - String solution; //解决方案
+    - String logicOperation;// 组内规则逻辑关系
+
+    - void updateGroupSolution(String solution,IDiagnoseRuleGroupRepository diagnoseRuleGroupRepository);//修改解决方案
+}
+
+IDiagnoseRuleGroup <|.. DefaultDiagnoseRuleGroup
+@enduml

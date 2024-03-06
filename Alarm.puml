@@ -1,0 +1,85 @@
+@startuml
+
+class AlarmEntity{
+    ...静态信息...
+    - String alarmNum; //报警编号
+    - Integer alarmStatus; //报警状态
+    - Long alarmTime; //报警时间
+    - AlarmLevel getAlarmLevel();
+    - AlarmRule getAlarmRule();
+    - AlarmType getAlarmType();
+    - AlarmSource getAlarmSource();
+    - AlarmPosition getAlarmPosition();
+    - AlarmContent getAlarmContent();
+
+    - void save();
+    - void relieveAlarm(); //解除报警
+    - void finishAlarm(); //完结报警
+    - Boolean supportType();
+}
+
+class AlarmLevel{
+    - Integer level1;
+    - String level2;
+    - String level3;
+}
+
+class AlarmType{
+    - String type1; //一级类型
+    - String type2; //二级类型
+    - String type3; //三级类型
+}
+
+class AlarmSource{
+    - String sourceId; //来源id
+    - String sourceName; //来源名称
+    - String sourceType; //来源类型
+    - String sourceTypeId;//来源类型名称
+    - DeviceInfo getDeviceInfo();//设备信息
+}
+class AlarmPosition{
+    - Area getArea(); //区域,继承类实现
+    - Double latitude;  //维度
+    - Double longitude; //经度
+}
+class AlarmContent{
+    - String desc; //报警描述
+    - String img; //图片
+    - {abstract} AlarmData getAlarmData(); //报警数据，继承类实现
+}
+
+class DeviceInfo{
+    - String deviceCode; //设备编号
+    - String deviceName; //设备名称
+}
+
+abstract class AlarmData{
+
+}
+
+abstract class Area{
+
+}
+
+interface AlarmRule{
+    RuleParam getRuleParam(); //规则参数
+    Boolean supportType();
+    Boolean compute(AlarmData data); //报警计算
+}
+interface AlarmProcessor{
+    AlarmEntity buildAlarmEntity(AlarmReq req); //组装报警实体
+    AlarmComputeRes compute(AlarmEntity entity); //报警计算
+    void handleAlarm(AlarmComputeRes res); //报警处置
+}
+
+AlarmEntity "1" *-- "1" AlarmLevel
+AlarmEntity "1" *-- "1" AlarmType
+AlarmEntity "1" *-- "1" AlarmSource
+AlarmEntity "1" *-- "1" AlarmPosition
+AlarmEntity "1" *-- "1" AlarmContent
+AlarmEntity "1" *-- "1" AlarmRule
+AlarmSource "1" *-- "1" DeviceInfo
+AlarmContent "1" *-- "1" AlarmData
+AlarmPosition "1" *-- "1" Area
+
+@enduml

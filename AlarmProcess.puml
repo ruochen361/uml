@@ -1,0 +1,26 @@
+@startuml
+participant 事件发布 as publisher
+participant 报警流程触发器 as trigger
+participant 报警处理器 as processor
+participant 报警实体 as alarmEntity
+participant 报警规则 as rule
+
+autonumber
+publisher -> trigger: 监听报警原始数据/报警事件(event)
+trigger -> processor: 根据类型获取处理器 getProcessor(type)
+processor -> alarmEntity: 组装报警实体buildAlarmEntity(AlarmReq)
+alarmEntity --> processor: 返回报警实体
+
+processor -> alarmEntity: 计算compute(entity)
+activate processor
+alarmEntity -> rule: 报警规则getAlarmRule()
+rule --> processor: 计算compute(AlarmData)
+deactivate processor
+
+processor -> processor: 报警结果处置handleAlarm(AlarmComputeRes)
+activate processor
+processor->alarmEntity: alarmEntity.save()
+processor->publisher: 发布报警事件AlarmResultEvent
+deactivate publisher
+
+@enduml

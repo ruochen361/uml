@@ -1,0 +1,28 @@
+@startuml
+
+participant 数据操作命令调用 as external
+participant 接收数据更新命令 as command
+participant 业务处理 as service
+participant 报警数据持久化操作 as alarmRepository
+participant 事件发布 as publisher
+participant 事件推送触发器 as trigger
+participant 事件数据持久化操作 as eventRepository
+participant 业务事件推送 as producer
+
+external -> command:接收数据操作命令
+command -> service:处理数据操作命令
+
+activate service
+service -> alarmRepository:报警数据持久化
+service --> publisher:发布数据更新通知事件（AlarmDomainNoticeEvent）
+service ->command:更新响应
+deactivate service
+external <- command:更新响应
+
+publisher -> trigger:触发数据更新通知流程
+activate trigger
+trigger --> producer:发送MQ事件消息
+trigger -> eventRepository:通知事件持久化（AlarmNoticeEvent）
+deactivate trigger
+
+@enduml

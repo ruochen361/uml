@@ -1,0 +1,27 @@
+@startuml
+
+abstract class AlarmDomainEvent{
+    {abstract} Long getTime();
+}
+
+class AlarmResultEvent{
+    - Boolean isAlarm();
+    - AlarmEntity getAlarmEntity();
+}
+
+class AlarmStatusUpdateEvent{
+    - String alarmNumber;
+    - Integer status;
+    - String operator;
+}
+
+class AlarmStatusChangeEvent{
+    - String alarmNumber;
+    - Integer status;
+}
+
+AlarmDomainEvent <|-- AlarmResultEvent
+AlarmDomainEvent <|-- AlarmStatusUpdateEvent
+AlarmDomainEvent <|-- AlarmStatusChangeEvent
+
+@enduml

@@ -1,0 +1,78 @@
+@startuml
+
+title 对象成果创建
+
+participant web as web
+participant 业务 as business
+participant 生态对象 as ecoObject
+participant 监听器 as listener
+participant 任务 as task
+participant 中台调度 as schedule
+participant 数据中台 as gdc
+participant cim中台 as cim
+
+skinparam responseMessageBelowArrow true
+
+activate web
+autonumber 1
+web -> business: 创建对象成果
+autonumber 2.1
+business-> business: 成果名称校验
+web <- business: 名称重复
+autonumber 3
+business-> business: 对象成果记录保存
+
+autonumber 4.1
+business-\ ecoObject: 查询监测对象全部实例id
+activate business
+ecoObject -\ cim: 查询对象全部实例id
+ecoObject \-- cim: 对象全部实例id
+business \-- ecoObject: 监测对象全部实例id
+deactivate business
+
+autonumber 5
+business->business: 组装添加业务对象属性组请求体
+business->ecoObject: 业务对象添加属性组
+activate ecoObject
+ecoObject -> ecoObject: 查询业务对象信息
+ecoObject -> ecoObject: 查询关联业务对象信息
+ecoObject -> ecoObject: 保存新增属性组
+
+ecoObject --> listener: 发布新增属性组事件
+autonumber 11.1
+listener -> listener: 创建资源
+note left
+发布异步事件，异步处理
+end note
+activate listener
+listener -> gdc: 创建资源表
+listener -> gdc: 发布资源表接口
+deactivate listener
+
+autonumber 12.1
+listener -> listener: 创建预览查询集
+activate listener
+ecoObject /- listener: 查询业务对象
+ecoObject --/ listener: 业务对象
+listener -> listener: 组装查询集
+listener -> gdc: 创建查询集
+listener -> ecoObject: 保存预览查询集关联属性组
+listener -> gdc: 发布查询集接口
+deactivate listener
+
+autonumber 13
+ecoObject-> ecoObject: 组装任务创建请求体
+
+ecoObject-> task: 创建任务
+activate task
+task -\ schedule: 创建任务
+task \-- schedule: 任务结果
+task -> task: 保存创建结果
+task -> schedule: 更新任务启动状态
+ecoObject<- task: 创建完成
+deactivate task
+
+business<- ecoObject: 添加完成
+deactivate ecoObject
+web<-business: 创建完成
+@enduml

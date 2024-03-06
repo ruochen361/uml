@@ -1,0 +1,31 @@
+@startuml
+
+participant 定时任务 as job
+participant 处理服务 as service
+participant VIP车辆 as vip
+participant 通知 as notice
+participant 中台 as gdc
+participant 数据库 as datebase
+participant 短信服务 as message
+
+job -> service:发起VIP车辆入岛短信发送任务
+
+activate service
+service->vip:获取应通知VIP车辆
+    activate vip
+    vip -> gdc:获取实时入岛车辆
+    vip -> gdc:获取VIP车辆
+    vip -> redis:获取当天已发送短信VIP车辆
+    vip -> vip:校验实时入岛VIP车辆
+    service <- vip:返回需通知车牌号
+    deactivate vip
+service->notice:短信通知
+    activate notice
+    notice -> datebase:获取VIP车辆通知手机号
+    notice -> message:发送短信通知
+    notice -> redis:记录当天已发送短信VIP车辆
+    notice -> datebase:保存短信发送记录
+    deactivate notice
+deactivate service
+
+@enduml

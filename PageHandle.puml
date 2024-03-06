@@ -1,0 +1,51 @@
+@startuml
+class PageTransBeginDto{
+    - Integer beginPage; //起始页
+    - Integer beginPointer; //起始游标
+}
+
+class PageTransEndDto{
+    - Integer pages; //页数
+    - Integer endPage; //结束页
+}
+
+class PageTransDto{
+    - PageTransBeginDto beginDto;
+    - PageTransEndDto endDto;
+}
+
+
+class ConcurrentPageReq{
+
+    == 业务端分页参数 ==
+    - Integer pageNo;
+    - Integer pageSize;
+    - Boolean enableCount;
+
+    == 请求header ==
+    - HttpEntity entity
+    - String requestUrl
+
+    == 分页重算结果 ==
+    - PageTransDto pageTransDto;
+}
+
+
+class UrlUtils{
+    + Boolean judgePage();//判断是否分页请求
+}
+
+class PageUtils{
+
+    + PageTransBeginDto  transBeginPage(Integer pageNo,Integer pageSize, Integer size);
+    + PageTransEndDto  transEndPage(Integer pageNo,Integer pageSize, Integer size, Integer total);
+}
+
+
+class PageHandler{
+    + {static} Integer size = 500;
+
+    + ResponseEntity handle(String requestUrl,HttpEntity entity);
+    + ResponseEntity concurrentPage(ConcurrentPageReq req);
+}
+@enduml

@@ -1,0 +1,19 @@
+@startuml
+participant 报警状态更新发布器 as publisher
+participant 报警流程触发器 as trigger
+participant 领域服务 as service
+participant 报警实体 as alarmEntity
+
+
+autonumber
+publisher -> trigger: 监听报警状态更新事件(AlarmStatusUpdateEvent)
+activate trigger
+trigger->service: 更新报警状态
+service -> alarmEntity: getAlarmEntity(event.getAlarmNumber())
+alarmEntity -> alarmEntity: 解除报警alarmEntity.relieveAlarm()
+alarmEntity -> publisher: 报警状态变化事件(AlarmStatusChangeEvent)
+alarmEntity -> alarmEntity: 完结报警alarmEntity.finishAlarm()
+alarmEntity -> publisher: 报警状态变化事件(AlarmStatusChangeEvent)
+deactivate alarmEntity
+
+@enduml

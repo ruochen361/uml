@@ -1,0 +1,64 @@
+@startuml
+
+title 图层注册并创建对象
+
+'https://plantuml.com/sequence-diagram
+participant 注册 as web
+participant 生态一张图 as eco
+participant 图层标准服务 as ogc
+participant 生态业务对象 as businessObject
+participant 数据中台 as gdc
+participant cim中台 as cim
+
+skinparam responseMessageBelowArrow true
+
+autonumber 1.1
+activate web
+web -> eco : 图层注册资源（图层url）
+autonumber 2.1
+eco -\ ogc: 获取图层支持服务协议
+eco \-- ogc: WMS,WFS...
+autonumber 3.1
+eco -\ ogc: 获取图层数据几何类型
+eco \-- ogc: geometry_type
+autonumber 4
+eco ->eco: 保存图层信息为资源信息
+autonumber 1.2
+eco --> web: 注册完成
+autonumber 5
+eco ->> businessObject: WFS协议创建生态对象
+note left
+异步通知
+end note
+deactivate web
+
+
+activate businessObject #FFBBBB
+businessObject ->> gdc: MQ通知gdc创建图层表，并同步表数据
+note left
+异步通知
+end note
+...
+group 定时重复执行，查询已完查数据同步图层
+autonumber 7.1
+businessObject -\ gdc: 查询图层数据表元信息
+activate businessObject #DarkSalmon
+businessObject \-- gdc: 图层数据表元信息
+
+autonumber 8
+businessObject -> gdc: 发布图层数据表接口
+autonumber 9.1
+businessObject -> cim: 创建图层对象定义
+cim -> cim: 同步图层数据表创建对象实例
+
+autonumber 10.1
+businessObject -\ cim: 查询图层对象定义详情
+businessObject \-- cim: 图层对象定义
+autonumber 11
+businessObject -> businessObject: 创建业务对象
+end
+deactivate businessObject
+
+deactivate businessObject
+
+@enduml

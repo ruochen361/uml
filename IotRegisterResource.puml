@@ -1,0 +1,44 @@
+@startuml
+
+title 物联设备同步
+
+'https://plantuml.com/sequence-diagram
+participant 生态业务对象 as businessObject
+participant 生态一张图 as eco
+participant cim中台 as cim
+
+skinparam responseMessageBelowArrow true
+group 定时重复执行，同步中台cim的物联对象
+
+autonumber 1.1
+activate businessObject
+businessObject -\ cim: 查询所有物联设备对象定义（iot_device）
+businessObject \-- cim: 物联设备对象
+
+autonumber 2
+businessObject->businessObject: 过滤未同步物联对象定义
+
+autonumber 3.1
+businessObject -\ cim: 查询未同步物联设备对象定义详情
+businessObject \-- cim: 物联设备对象定义详情
+
+autonumber 4.1
+businessObject -\ cim: 查询物联对象实例位置信息
+activate businessObject
+businessObject \-- cim: 物联对象实例位置信息列表
+note over businessObject,eco
+物联设备注册一张图资源
+end note
+autonumber 5.1
+businessObject -\ eco: 组装并创建物联一张图资源
+businessObject \-- eco: 物联一张图资源信息
+deactivate businessObject
+
+autonumber 6
+businessObject -> businessObject: 组装物联监测属性组
+businessObject -> businessObject: 根据cim属性集组装属性组
+businessObject -> businessObject: 创建业务对象
+end
+deactivate businessObject
+
+@enduml
