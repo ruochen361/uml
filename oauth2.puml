@@ -1,0 +1,20 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title oauth2流程
+participant 资源拥有者 as resourceOwner
+participant 客户端 as client
+participant 授权服务器 as authorizationServer
+participant 资源服务器 as resourceServer
+
+
+autonumber
+
+resourceOwner <- client: 客户端请求授权
+resourceOwner -> authorizationServer: 资源拥有者认证身份
+resourceOwner -> authorizationServer: 资源拥有者许可授权
+client -> authorizationServer: 客户端发送授权许可
+client <- authorizationServer: 授权服务器发送访问令牌
+client -> resourceServer: 客户端发送访问令牌
+client <- resourceServer: 资源服务器发送受保护资源
+
+@enduml

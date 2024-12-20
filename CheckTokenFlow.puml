@@ -1,0 +1,41 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+
+title 用户token检验
+
+start
+:校验token接口
+/user/checkUserToken;
+
+if(token是否为空) then(true)
+:3001;
+else(false)
+  if(token来源) then (认证中心)
+    if (检验Redis缓存token) is (yes) then
+      :更新Redis缓存token;
+      :返回token有效;
+    else (no)
+      :3001;
+      endif
+  else(非认证中心)
+    if(广联云) then(true)
+    :校验广联云token
+    /v3/api/userinfo;
+        if(响应结果) then (success)
+        :返回token有效;
+        else(fail)
+        :3001;
+        endif
+    else(false)
+    :请求LK校验token;
+        if(响应结果) then (success)
+        :返回token有效;
+        else(fail)
+        :3001;
+        endif
+    endif
+  endif
+endif
+stop
+
+@enduml

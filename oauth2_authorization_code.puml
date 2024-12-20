@@ -1,0 +1,36 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title 授权码模式
+participant 资源拥有者 as resourceOwner
+participant 第三方应用 as client
+participant 资源服务器 as resourceServer
+participant 授权服务器 as authorizationServer
+
+
+activate resourceOwner
+resourceOwner -> client: 用户访问三方应用
+deactivate resourceOwner
+
+activate client
+client -> authorizationServer: 发送client_id请求授权码
+deactivate
+
+activate authorizationServer
+resourceOwner <- authorizationServer: 授权界面
+activate resourceOwner
+resourceOwner -> authorizationServer: 确认授权及授权范围
+deactivate resourceOwner
+client <- authorizationServer: 返回授权码
+activate client
+client -> authorizationServer: 通过授权码和client_id请求token
+client <- authorizationServer: 返回access_token和refresh_token
+deactivate client
+deactivate authorizationServer
+
+client -> resourceServer: 携带access_token请求资源
+activate resourceServer
+activate client
+client <- resourceServer: 返回受保护资源
+deactivate client
+deactivate resourceServer
+@enduml

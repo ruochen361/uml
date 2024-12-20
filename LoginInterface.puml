@@ -1,0 +1,58 @@
+@startuml
+'https://plantuml.com/activity-diagram-beta
+title 登录接口流程
+start
+:                           登录接口
+                   /loginByPassword
+(userName,password,captchaVerification);
+if(校验验证码) then (true);
+    if(账号密码解密) then (true);
+        :获取用户登录失败次数;
+        if(次数<5) then (true);
+        :请求广联云access_token
+        /v3/api/oauth2/token
+        (username,password);
+            if(响应结果) then (success);
+            :请求广联云用户信息
+            /v3/api/userinfo
+            (access_token);
+               if(响应结果) then (fail);
+               :3001;
+               else(success);
+               :                     拼接token
+               sessionPrefix+access_token+uuid;
+               :请求权限系统用户信息
+               /user/glyUserId;
+                  if(响应结果) then (fail);
+                    :3001;
+                  else(success);
+                      :redis缓存用户信息(2d);
+                      :获取用户头像;
+                      :请求广联云login_token单点登录
+                      (access_token);
+                      if(响应结果) then (success);
+                          :拼接单点登录重定向地址
+                          /tokenLogin?token={login_token};
+                          :登录成功;
+                      else(fail);
+                          :获取广联云login_token失败;
+                      endif
+                  endif
+               endif
+            else(fail);
+            :登录失败计数;
+            :账号密码登陆失败;
+            endif
+        else(false);
+        :5000;
+        endif
+    else(false);
+    :账号密码解密失败;
+    endif
+else(false)
+:验证码校验失败;
+endif
+stop
+
+
+@enduml

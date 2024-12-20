@@ -1,0 +1,57 @@
+@startuml
+
+
+participant document_Batch_view
+participant Batch
+participant DocumentSerializers
+participant ParagraphSerializers
+participant db
+participant embedding
+
+document_Batch_view -\ Batch: 初始化Batch(dataset_id)
+document_Batch_view \- Batch:
+document_Batch_view -> Batch: batch_save({name:'',paragraphs:[{content:'',title:'',is_active:'',problem_list:''}]})
+activate Batch
+Batch -> DocumentSerializers: get_document_paragraph_model
+activate DocumentSerializers
+DocumentSerializers -> DocumentSerializers: get_paragraph_model
+activate DocumentSerializers
+DocumentSerializers -\ ParagraphSerializers: 创建段落对象
+DocumentSerializers \- ParagraphSerializers:
+DocumentSerializers -\ ParagraphSerializers: get_paragraph_problem_model
+DocumentSerializers \- ParagraphSerializers:
+deactivate DocumentSerializers
+Batch <- DocumentSerializers:
+deactivate DocumentSerializers
+Batch -> db: 插入文档document
+Batch -> db: 段落保存paragraph
+Batch -> db: 问题保存problem
+Batch -> db: 关联保存problem_paragraph_mapping
+Batch -\ db: 查询文档
+Batch \- db:
+
+Batch --> Batch: post_embedding
+note left
+函数后处理
+end note
+activate Batch #FFBBBB
+Batch -> DocumentSerializers: refresh
+activate DocumentSerializers
+DocumentSerializers -> db: 获取embedding_mode
+DocumentSerializers -> embedding: embedding_by_document.delay(document_id, embedding_model_id)
+activate embedding #DarkSalmon
+embedding -> embedding: get_embedding_model
+note left
+延迟异步任务
+end note
+embedding -> ListenerManagement: embedding_by_document
+deactivate embedding
+deactivate DocumentSerializers
+deactivate Batch
+
+
+document_Batch_view <- Batch:
+deactivate Batch
+
+
+@enduml

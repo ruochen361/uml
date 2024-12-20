@@ -1,0 +1,44 @@
+@startuml
+
+
+participant document_Split_view
+participant Split
+participant document_serializers
+participant SplitHandle
+participant SplitModel
+
+document_Split_view -\ Split: 初始化Split(file,patterns,limit,with_filter)
+document_Split_view \- Split:
+
+document_Split_view -> Split: 校验文件大小
+
+document_Split_view -> Split: 解析文档
+activate Split
+
+Split -> document_serializers: file_to_paragraph
+activate document_serializers
+
+document_serializers -> document_serializers: 获取FileBufferHandle().get_buffer
+document_serializers -> document_serializers: 选择BaseSplitHandle实现html,text,pdf,doc
+document_serializers -> SplitHandle: 分割处理
+
+activate SplitHandle
+SplitHandle -> SplitHandle: get_buffer读取文件内容
+SplitHandle -\ SplitModel: 创建SplitModel(patterns,limit,with_filter)
+SplitHandle \- SplitModel:
+SplitHandle -> SplitModel: 解析文本
+activate SplitModel
+SplitModel -> SplitModel: parse_to_tree解析为树形结果
+SplitModel -> SplitModel: result_tree_to_paragraph转换为分段对象
+SplitModel -> SplitModel: post_reset_paragraph
+
+SplitHandle <- SplitModel:
+deactivate SplitModel
+document_serializers <- SplitHandle:
+deactivate SplitHandle
+Split <- document_serializers:
+deactivate document_serializers
+document_Split_view <- Split:
+deactivate Split
+
+@enduml

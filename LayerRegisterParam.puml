@@ -1,0 +1,156 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+class LayerRegisterParam{
+    String: id
+    IdParam: idParam
+    RegisterSupportParam: supportParam
+    AuthParam: authParam
+    SubsidiaryParam: subsidiaryParam
+    ..
+    String: thumbnail
+    BoundingBox: initialRange
+    BoundingBox: fullRange
+    ..
+    MetaParam
+    ISearchParam
+    LegendParam
+    StyleParam
+    --
+    save()
+    update(LayerRegisterParam param)
+}
+
+class IdParam{
+    String: code
+    String: name
+    String: nodeId
+    --
+    checkCodeAndName()
+}
+
+class RegisterSupportParam{
+    String: sourcePlatform
+    String: sourceUrl
+    String: layerName
+    String: coordinate
+    ServiceProtocolParam: protocolParam
+}
+
+class AuthParam{
+    AuthType: authType
+    String: paramJson
+}
+
+enum Protocol {
+    WMTS
+    WFS
+    WMS
+
+}
+
+enum AuthType{
+    None
+    Header
+    Query
+}
+
+abstract class ServiceProtocolParam{
+    Protocol: protocol
+    Map: param
+}
+
+class WMTSParam{
+}
+
+class SubsidiaryParam{
+    服务标签
+    所属单位
+    生产单位
+    描述信息
+    注册人
+    注册时间
+    最大缩放等级
+    最小缩放等级
+}
+
+class MetaParam{
+    String url
+    Boolean enable
+}
+
+class ISearchParam{
+    String url
+    Boolean enable
+}
+
+class LegendParam{
+    String url
+    Boolean enable
+}
+
+class StyleParam{
+    String url
+    Boolean enable
+}
+
+LayerRegisterParam *-- IdParam
+LayerRegisterParam *-- RegisterSupportParam
+LayerRegisterParam o-- AuthParam
+RegisterSupportParam *-- ServiceProtocolParam
+LayerRegisterParam *-- SubsidiaryParam
+ServiceProtocolParam <|-- WMTSParam
+
+AuthParam *-- AuthType
+ServiceProtocolParam *-- Protocol
+
+LayerRegisterParam o-- MetaParam
+LayerRegisterParam o-- ISearchParam
+LayerRegisterParam o-- LegendParam
+LayerRegisterParam o-- StyleParam
+
+
+
+abstract class RegisterHandleEvent{
+    IdParam
+    AuthParam
+    String servicePlatform
+}
+
+class RegisterPreviewEvent{
+    RegisterSupportParam current
+    RegisterSupportParam previous
+}
+
+class RegisterISearchEvent{
+    ISearchParam current
+    ISearchParam previous
+}
+
+class RegisterLegendEvent{
+    LegendParam current
+    LegendParam previous
+}
+
+RegisterHandleEvent <|-- RegisterPreviewEvent
+RegisterHandleEvent <|-- RegisterISearchEvent
+RegisterHandleEvent <|-- RegisterLegendEvent
+
+
+
+
+'class LayerPreview{
+'    layerCode: String,
+'    previewUrl: String,
+'    servicePlatform: String,
+'    coordinate: String,
+'    protocol: Protocol,
+'    param: Map<String,Any>
+'    authParam: AuthParam
+'}
+
+
+
+
+@enduml

@@ -1,0 +1,39 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+participant BaseSearchDatasetStep
+participant ModelManage
+participant embedding_model
+participant VectorStore
+participant pg_vector
+participant EmbeddingSearch
+participant db
+
+
+BaseSearchDatasetStep -\ db: dataset 获取embedding_mode_id
+BaseSearchDatasetStep \- db:
+BaseSearchDatasetStep -\ db: model 获取model_id
+BaseSearchDatasetStep \- db:
+BaseSearchDatasetStep -\ ModelManage: 获取向量模型
+BaseSearchDatasetStep \- ModelManage:
+BaseSearchDatasetStep -\ embedding_model: 问题向量化
+BaseSearchDatasetStep \- embedding_model:
+BaseSearchDatasetStep -\ VectorStore: 获取向量库
+BaseSearchDatasetStep \- VectorStore: pg_vector
+BaseSearchDatasetStep -> pg_vector: 搜索向量库
+activate pg_vector
+pg_vector -/ db: embedding 获取知识库向量集
+pg_vector \- db:
+pg_vector -> EmbeddingSearch: 执行查询
+activate EmbeddingSearch
+EmbeddingSearch -> EmbeddingSearch: generate_sql_by_query_dict
+EmbeddingSearch -> EmbeddingSearch: select_list
+pg_vector <- EmbeddingSearch:
+deactivate EmbeddingSearch
+BaseSearchDatasetStep <- pg_vector:
+deactivate pg_vector
+BaseSearchDatasetStep -> BaseSearchDatasetStep: list_paragraph
+
+
+
+@enduml

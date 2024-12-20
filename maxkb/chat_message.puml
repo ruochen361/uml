@@ -1,0 +1,44 @@
+@startuml
+
+
+participant application_Message_view
+participant ChatMessageSerializer
+participant PipelineManage
+participant WorkflowManage
+participant db
+
+application_Message_view -\ ChatMessageSerializer: 初始化ChatMessageSerializer(dataset_id)
+application_Message_view \- ChatMessageSerializer:
+application_Message_view -> ChatMessageSerializer: chat()
+activate ChatMessageSerializer
+ChatMessageSerializer -> ChatMessageSerializer: get_chat_info()
+activate ChatMessageSerializer
+ChatMessageSerializer -> db: application_chat
+ChatMessageSerializer -> db: application
+deactivate ChatMessageSerializer
+ChatMessageSerializer -> ChatMessageSerializer: 会话校验
+ChatMessageSerializer -> ChatMessageSerializer: 会话类型
+activate ChatMessageSerializer
+alt 会话类型为SIMPLE
+    ChatMessageSerializer -> ChatMessageSerializer: chat_simple
+    activate ChatMessageSerializer
+    ChatMessageSerializer -> PipelineManage: 构造流水线：1.问题优化 2.查询知识库 3.生成模型输入 4.模型对话 5.输出解析
+    ChatMessageSerializer -> ChatMessageSerializer: 组装运行参数
+    ChatMessageSerializer -\ PipelineManage: 运行流水线
+    ChatMessageSerializer \- PipelineManage:
+    deactivate ChatMessageSerializer
+else 会话类型为WORK_FLOW
+    ChatMessageSerializer -> ChatMessageSerializer: chat_work_flow
+    activate ChatMessageSerializer
+    ChatMessageSerializer -> db: application_chat_record
+    ChatMessageSerializer -> WorkflowManage: 构造工作流
+    ChatMessageSerializer -\ WorkflowManage: 运行工作流
+    ChatMessageSerializer \- WorkflowManage:
+    deactivate ChatMessageSerializer
+deactivate ChatMessageSerializer
+end
+
+application_Message_view <- ChatMessageSerializer:
+deactivate ChatMessageSerializer
+
+@enduml

@@ -1,0 +1,22 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+title 图层预览状态异步通知
+participant 页面 as web
+participant 图层服务 as layer
+participant 通知服务 as notice
+participant 图层发布服务 as publish
+participant 数据库 as db
+
+autonumber
+web -> layer: 尝试获取图层预览状态
+layer -> notice: 查询图层状态
+notice -> db: 查询图层状态
+notice ->layer: 图层状态
+layer -> web: 图层状态
+
+autonumber
+publish --> layer: 图层状态事件
+layer -> db: 更新图层状态
+layer -> notice: 图层状态事件
+
+@enduml
